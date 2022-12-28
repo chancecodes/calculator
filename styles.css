@@ -1,0 +1,25 @@
+.display{
+    border: 1px solid black;
+    width: 450px;
+    height: 250px;
+}
+
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    width: 500px;
+    height: 750px;
+    border: 1px solid black;
+}
+
+.btn {
+    height: 50px;
+    width: 80px;
+}
+
+#zero {
+    width: 160px;
+}
