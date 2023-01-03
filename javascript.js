@@ -8,50 +8,6 @@
 // accept new values//or skip
 // repeat
 
-const operator = {
-    add: function add(a, b) {
-        return a + b
-    },
-    subtract: function subtract(a, b) {
-        return a - b;
-    },
-    multiply: function multiply(a, b) {
-        return a * b;
-    },
-    divide: function divide(a, b) {
-        return a / b;
-    },
-    percent: function percent(a) {
-        return a / 100;
-    }
-}
-
-const special = {
-    clear: function clear() {
-        for (let key in displayValue) {
-            displayValue[key] = "";
-        }
-        displayValue.temp = "0";
-        screen.textContent = displayValue.temp;
-    },
-    negator: function negator() {
-        let last = displayValue.recent;
-        displayValue[`${last}`] = "-" + displayValue[`${last}`];
-
-        screen.textContent = displayValue[`${last}`]
-    },
-    percent: function percent() {
-        let last = displayValue.recent;
-        displayValue[`${last}`] /= 100;
-
-        screen.textContent = displayValue[`${last}`]
-    },
-}
-
-function operate(callback, a, b) {
-    return operator[`${callback}`](Number(a), Number(b))
-}
-
 var displayValue = {
     temp: "0",
     stored: "",
@@ -71,6 +27,57 @@ btn.forEach((button) => {
 })
 
 
+const operator = {
+    add: function add(a, b) {
+        return a + b
+    },
+    subtract: function subtract(a, b) {
+        return a - b;
+    },
+    multiply: function multiply(a, b) {
+        return a * b;
+    },
+    divide: function divide(a, b) {
+        return a / b;
+    },
+    percent: function percent(a) {
+        return a / 100;
+    }
+}
+
+function operate(callback, a, b) {
+    return operator[`${callback}`](Number(a), Number(b))
+}
+
+const special = {
+    allClear: function allClear() {
+        for (let key in displayValue) {
+            displayValue[key] = "";
+        }
+        displayValue.temp = "0";
+        screen.textContent = displayValue.temp;
+    },
+    negator: function negator(last) {
+        if (displayValue[`${last}`].startsWith("-")) {
+            displayValue[`${last}`] = displayValue[`${last}`].slice(1)
+        } else {
+            displayValue[`${last}`] = "-" + displayValue[`${last}`];
+        }
+        screen.textContent = displayValue[`${last}`]
+    },
+    percent: function percent(last) {
+        displayValue[`${last}`] /= 100;
+
+        screen.textContent = displayValue[`${last}`]
+    },
+    clear: function clear(last) {
+        if (displayValue[`${last}`]) {
+            displayValue[`${last}`] = ""
+        }
+        screen.textContent = displayValue[`${last}`]
+    }
+}
+
 function display(e) {
     const value = e.currentTarget.innerHTML;
 
@@ -79,7 +86,8 @@ function display(e) {
     
     if (e.currentTarget.classList.contains("special")) {
         let specialty = e.currentTarget.id;
-        special[`${specialty}`]();
+        var last = displayValue.recent;
+        special[`${specialty}`](last);
 
     } else if (isOperator(e)) { 
         if (displayValue.stored && displayValue.equals === "off") {
