@@ -23,7 +23,7 @@ screen.textContent = displayValue.temp;
 
 const btn = document.querySelectorAll('.btn')
 btn.forEach((button) => {
-    button.addEventListener ('click', display)
+    button.addEventListener ('click', display);
 })
 
 
@@ -46,7 +46,7 @@ const operator = {
 }
 
 function operate(callback, a, b) {
-    return operator[`${callback}`](Number(a), Number(b))
+    return operator[`${callback}`](Number(a), Number(b));
 }
 
 const special = {
@@ -63,19 +63,28 @@ const special = {
         } else {
             displayValue[`${last}`] = "-" + displayValue[`${last}`];
         }
-        screen.textContent = displayValue[`${last}`]
+        screen.textContent = displayValue[`${last}`];
     },
     percent: function percent(last) {
         displayValue[`${last}`] /= 100;
 
-        screen.textContent = displayValue[`${last}`]
+        screen.textContent = displayValue[`${last}`];
     },
     clear: function clear(last) {
         if (displayValue[`${last}`]) {
-            displayValue[`${last}`] = ""
+            displayValue[`${last}`] = "0";
         }
-        screen.textContent = displayValue[`${last}`]
-    }
+        screen.textContent = displayValue[`${last}`];
+    },
+    decimal: function decimal(last) {
+        if (displayValue[`${last}`] === "" 
+        || displayValue[`${last}`] === "0") {
+            displayValue[`${last}`] = "0."
+        } else if (!displayValue[`${last}`].includes(".")) {
+            displayValue[`${last}`] = displayValue[`${last}`] + "."
+        } 
+        screen.textContent = displayValue[`${last}`];
+    },
 }
 
 function display(e) {
@@ -90,7 +99,8 @@ function display(e) {
         special[`${specialty}`](last);
 
     } else if (isOperator(e)) { 
-        if (displayValue.stored && displayValue.equals === "off") {
+        if ((displayValue.stored && displayValue.equals === "off") 
+        && (displayValue.current != "")) {
             operation();
         }
         displayValue.operator = e.currentTarget.id;
@@ -101,19 +111,18 @@ function display(e) {
     } else if (e.currentTarget.id === "equals") {
         operation();
     } else if (displayValue.stored) { // accepts new values after operator
+        clearZero("current");
         displayValue.current += value;
         screen.textContent = displayValue.current;
         mostRecent("current");
     }  else { //accepts values
-        if (displayValue.temp === "0") {
-            displayValue.temp = "";
-        }
+        clearZero("temp");
         displayValue.temp += value;
         screen.textContent = displayValue.temp;
         mostRecent("temp");
     }
 
-    console.table(displayValue)
+    console.table(displayValue);
 }
 
 function isOperator(e) {
@@ -135,4 +144,10 @@ function operation () {
 
 function mostRecent(lastUsed) {
     displayValue.recent = lastUsed;
+}
+
+function clearZero (lastUsed) {
+    if (displayValue[`${lastUsed}`] === "0") {
+        displayValue[`${lastUsed}`] = "";
+    }
 }
