@@ -26,7 +26,6 @@ btn.forEach((button) => {
     button.addEventListener ('click', display);
 })
 
-
 const operator = {
     add: function add(a, b) {
         return a + b
@@ -58,47 +57,53 @@ const special = {
         screen.textContent = displayValue.temp;
     },
     negator: function negator(last) {
-        if (displayValue[`${last}`].startsWith("-")) {
-            displayValue[`${last}`] = displayValue[`${last}`].slice(1)
+        if (last.startsWith("-")) {
+            last = last.slice(1)
         } else {
-            displayValue[`${last}`] = "-" + displayValue[`${last}`];
+            last = "-" + last;
         }
-        screen.textContent = displayValue[`${last}`];
+        screen.textContent = last;
+
     },
     percent: function percent(last) {
-        displayValue[`${last}`] /= 100;
-
-        screen.textContent = displayValue[`${last}`];
+        last =  `${last / 100}`;
+        screen.textContent = last;
+        displayValue[`${displayValue.recent}`] = last
     },
     clear: function clear(last) {
-        if (displayValue[`${last}`]) {
-            displayValue[`${last}`] = "0";
+        if (displayValue.recent === "current"  || displayValue.recent === "temp") {
+            last = "0";
+        } else {
+            special.allClear();
+            last = displayValue.temp;
         }
-        screen.textContent = displayValue[`${last}`];
+        screen.textContent = last;
+        displayValue[`${displayValue.recent}`] = last;
     },
     decimal: function decimal(last) {
-        if (displayValue[`${last}`] === "" 
-        || displayValue[`${last}`] === "0") {
-            displayValue[`${last}`] = "0."
-        } else if (!displayValue[`${last}`].includes(".")) {
-            displayValue[`${last}`] = displayValue[`${last}`] + "."
-        } 
-        screen.textContent = displayValue[`${last}`];
+        if (displayValue.temp === "0") {
+            displayValue.temp = "0."
+            last = displayValue.temp;
+        } else if (last === "" || last === "0") {
+            last = "0."
+        } else if (!last.includes(".")) {
+            last += "."
+        }
+        
+        screen.textContent = last;
+        displayValue[`${displayValue.recent}`] = last;
     },
 }
 
 function display(e) {
     const value = e.currentTarget.innerHTML;
 
-    //stop accepting values when operator is clicked
-    // store operator and allow user to switch operator if mis-click occurs
-    
     if (e.currentTarget.classList.contains("special")) {
         let specialty = e.currentTarget.id;
-        var last = displayValue.recent;
-        special[`${specialty}`](last);
-
-    } else if (isOperator(e)) { 
+        var lastUsed = displayValue[`${displayValue.recent}`];
+        special[`${specialty}`](lastUsed);
+    }  else if (isOperator(e)) { //stop accepting values and store operator
+        // compute sum if second operator is clicked
         if ((displayValue.stored && displayValue.equals === "off") 
         && (displayValue.current != "")) {
             operation();
@@ -107,19 +112,22 @@ function display(e) {
         displayValue.stored = displayValue.temp;
         displayValue.current = "";
         displayValue.equals = "off";
-
+        mostRecent("current");
     } else if (e.currentTarget.id === "equals") {
         operation();
     } else if (displayValue.stored) { // accepts new values after operator
-        clearZero("current");
-        displayValue.current += value;
-        screen.textContent = displayValue.current;
-        mostRecent("current");
-    }  else { //accepts values
-        clearZero("temp");
-        displayValue.temp += value;
-        screen.textContent = displayValue.temp;
-        mostRecent("temp");
+        //if new number was pressed after equals, clear and start back at temp
+        if (displayValue.equals === "on") {  
+            special.allClear();
+            tempValue(value);
+        } else {
+            clearZero("current");
+            displayValue.current += value;
+            screen.textContent = displayValue.current;
+            mostRecent("current");
+        }
+    }  else { //accepts values (initial)
+        tempValue(value);
     }
 
     console.table(displayValue);
@@ -130,6 +138,10 @@ function isOperator(e) {
 }
 
 function operation () {
+    if (displayValue.current === "") {
+        displayValue.current = displayValue.stored;
+    };
+    
     displayValue.result = `${operate (displayValue.operator, displayValue.stored, displayValue.current)}`;
 
     displayValue.equals = "on";
@@ -147,7 +159,14 @@ function mostRecent(lastUsed) {
 }
 
 function clearZero (lastUsed) {
-    if (displayValue[`${lastUsed}`] === "0") {
-        displayValue[`${lastUsed}`] = "";
+    if (displayValue[lastUsed] === "0") {
+        displayValue[lastUsed] = "";
     }
+}
+
+function tempValue (value) {
+    clearZero("temp");
+    displayValue.temp += value;
+    screen.textContent = displayValue.temp;
+    mostRecent("temp");
 }
