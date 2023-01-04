@@ -37,7 +37,11 @@ const operator = {
         return a * b;
     },
     divide: function divide(a, b) {
-        return a / b;
+        if (b === 0) {
+            return "i'll pretend this didn't happen"
+        } else {
+            return a / b;
+        } 
     },
     percent: function percent(a) {
         return a / 100;
@@ -63,7 +67,6 @@ const special = {
             last = "-" + last;
         }
         screen.textContent = last;
-
     },
     percent: function percent(last) {
         last =  `${last / 100}`;
