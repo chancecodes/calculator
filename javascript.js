@@ -115,7 +115,7 @@ function display(e) {
         }
         displayValue.operator = e.currentTarget.id;
         displayValue.stored = displayValue.temp;
-        displayValue.current = "0";
+        displayValue.current = "";
         displayValue.equals = "off";
         mostRecent("current");
     } else if (e.currentTarget.id === "equals") {
@@ -145,9 +145,10 @@ function isOperator(e) {
 }
 
 function operation () {
-    if (displayValue.current === "0") {
+    if (displayValue.current === "") {
         displayValue.current = displayValue.stored;
     };
+
     mostRecent("stored");
 
     displayValue.result = `${operate (displayValue.operator, 
@@ -156,19 +157,18 @@ function operation () {
         }`;
 
 
-    if (displayValue.result.length >= 9) {
+    if (Number(displayValue.result) >= 999999999) {
         displayValue.result = `${Number(displayValue.result).toExponential()}`;
-        
-        console.log(displayValue.result)
+    
         floatNum(displayValue.result);
-        console.log("hi")
     } else {
+        console.log(displayValue.result)
+        displayValue.result = maxNine(displayValue.result)
+        console.log(displayValue.result)
         displayValue.result = addCommas(displayValue.result);
+        console.log(displayValue.result)
     }
-    // else {
-    //     displayValue.result = addCommas(displayValue.result);
-    //     displayValue.result = maxNine(displayValue.result);
-    // }
+
     displayValue.equals = "on";
 
     //when equals is pressed multiple times it still works
@@ -200,17 +200,16 @@ function tempValue (value) {
 
 function maxNine (num) {
     const max = num.match(/[0-9]/g).join("");
-    
-    //each max is +2 to account for commas
+ 
     if (max.length >= 9 ) {
         if (num.endsWith(".")) {
-            num = num.substring(0,11)
+            num = num.substring(0,9)
         } else if (num.includes(".") && num.includes("-")) {
-            num = num.substring(0, 13)
+            num = num.substring(0, 11)
         }  else if (num.includes(".") || num.includes("-")) {
-            num = num.substring(0, 12)
+            num = num.substring(0, 10)
         }  else {
-            num = num.substring(0,11)
+            num = num.substring(0,9)
         }
         displayValue[`${displayValue.recent}`] = num;
     }
@@ -219,12 +218,11 @@ function maxNine (num) {
 
 function addCommas(num) {
     return num = Number(num.replaceAll(",",""))
-    .toLocaleString("en-US", {maximumFractionDigits: 4});
+    .toLocaleString("en-US", {maximumFractionDigits: 8});
 
 }
 
 function floatNum (num) {
-    // const max = num.match(/[0-9]/g).join("");
     const locationE = num.indexOf("e");
     const e = num.substring(locationE, locationE + 1)
     const float = num.substring(locationE + 2)
