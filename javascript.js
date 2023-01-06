@@ -15,7 +15,7 @@ var displayValue = {
     operator: "",
     result: "",
     equals: "",
-    recent: "",
+    recent: "temp",
 };
 
 const screen = document.querySelector('.display');
@@ -53,58 +53,60 @@ function operate(callback, a, b) {
 }
 
 const special = {
-    allClear: function allClear() {
+    allClear: function allClear(num) {
         for (let key in displayValue) {
             displayValue[key] = "";
         }
-        displayValue.temp = "0";
-        screen.textContent = displayValue.temp;
+        displayValue.recent = "temp"
+        num = "0";
+        return num;
     },
-    negator: function negator(last) {
-        if (last.startsWith("-")) {
-            last = last.slice(1)
+    negator: function negator(num) {
+        if (num.startsWith("-")) {
+            return num = num.slice(1)
         } else {
-            last = "-" + last;
+            return num = "-" + num;
         }
-        screen.textContent = last;
     },
-    percent: function percent(last) {
-        last =  `${last / 100}`;
-        screen.textContent = last;
-        displayValue[`${displayValue.recent}`] = last
+    percent: function percent(num) {
+        return num =  `${num / 100}`;
     },
-    clear: function clear(last) {
-        if (displayValue.recent === "current"  || displayValue.recent === "temp") {
-            last = "0";
+    clear: function clear(num) {
+        if (displayValue.recent === "current" && displayValue.current === "0") {
+            special.allClear();
+        } else if (displayValue.recent === "current" || displayValue.recent === "temp") {
+            num = "0";
         } else {
             special.allClear();
-            last = displayValue.temp;
         }
-        screen.textContent = last;
-        displayValue[`${displayValue.recent}`] = last;
+        return num;
     },
-    decimal: function decimal(last) {
+    decimal: function decimal(num) {
         if (displayValue.temp === "0") {
-            displayValue.temp = "0."
-            last = displayValue.temp;
-        } else if (last === "" || last === "0") {
-            last = "0."
-        } else if (!last.includes(".")) {
-            last += "."
+            displayValue.recent = "temp"
+            num = "0."
+        } else if (num === "" || num === "0") {
+            num = "0."
+        } else if (!num.includes(".")) {
+            num += "."
+        } else {
+            num
         }
-        
-        screen.textContent = last;
-        displayValue[`${displayValue.recent}`] = last;
+        num = maxNine(num);
+        return num;
     },
 }
 
 function display(e) {
     const value = e.currentTarget.innerHTML;
+    const lastUsed = displayValue[`${displayValue.recent}`];
 
     if (e.currentTarget.classList.contains("special")) {
-        let specialty = e.currentTarget.id;
-        var lastUsed = displayValue[`${displayValue.recent}`];
-        special[`${specialty}`](lastUsed);
+        let specialty = e.currentTarget.id;    
+        result = special[`${specialty}`](lastUsed);
+        
+        displayValue[`${displayValue.recent}`] = screen.textContent = result;
+
     }  else if (isOperator(e)) { //stop accepting values and store operator
         // compute sum if second operator is clicked
         if ((displayValue.stored && displayValue.equals === "off") 
@@ -113,7 +115,7 @@ function display(e) {
         }
         displayValue.operator = e.currentTarget.id;
         displayValue.stored = displayValue.temp;
-        displayValue.current = "";
+        displayValue.current = "0";
         displayValue.equals = "off";
         mostRecent("current");
     } else if (e.currentTarget.id === "equals") {
@@ -126,8 +128,10 @@ function display(e) {
         } else {
             clearZero("current");
             displayValue.current += value;
-            screen.textContent = displayValue.current;
             mostRecent("current");
+            maxNine(displayValue.current);
+            screen.textContent = displayValue.current;
+            
         }
     }  else { //accepts values (initial)
         tempValue(value);
@@ -170,6 +174,55 @@ function clearZero (lastUsed) {
 function tempValue (value) {
     clearZero("temp");
     displayValue.temp += value;
-    screen.textContent = displayValue.temp;
     mostRecent("temp");
+    addComma(displayValue.temp)
+    maxNine(displayValue.temp);
+    screen.textContent = displayValue.temp;
 }
+
+function maxNine (num) {
+    const regex = /[0-9]/g;
+    const max = num.match(regex).join("")
+    
+    if (max.length >= 9 ) {
+        if (num.endsWith(".")) {
+            num = num.substring(0,9)
+        } else if (num.includes(".") && num.includes("-")) {
+            num = num.substring(0, 11)
+        }  else if (num.includes(".") || num.includes("-")) {
+            num = num.substring(0, 10)
+        }  else {
+            num = num.substring(0,9)
+        }
+        displayValue[`${displayValue.recent}`] = num;
+    }
+    return num;
+};
+
+function addComma (num) {
+    // if there's a decimal, take length in groups of three up to the decimal
+    // if no decimal, take every third
+    
+    if (num.length > 6) {
+        num = num.substr(0,3) + "," + num.substr(3, 6) + "," + num.substr (6);
+    } else if (num.length > 3) {
+        //string split at 3, add a comma, add the rest
+        num = num.substr(0,3) + "," + num(3)
+    }
+    return num;
+}
+
+
+//roundnum
+
+//commas
+
+//floating num
+
+//show equation
+
+//keyboard support
+
+//backspace
+
+//make pretty
