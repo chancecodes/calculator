@@ -129,10 +129,8 @@ function display(e) {
             clearZero("current");
             displayValue.current += value;
             mostRecent("current");
-            if (displayValue.current.length > 3) {
-                addComma(displayValue.current);
-            }
             maxNine(displayValue.current);
+            displayValue.current = Number(displayValue.current.replaceAll(",","")).toLocaleString();
             screen.textContent = displayValue.current;
         }
     }  else { //accepts values (initial)
@@ -150,11 +148,12 @@ function operation () {
     if (displayValue.current === "") {
         displayValue.current = displayValue.stored;
     };
-    
-    displayValue.stored = removeCommas(displayValue.stored);
-    displayValue.current = removeCommas(displayValue.current);
 
-    displayValue.result = `${operate (displayValue.operator, displayValue.stored, displayValue.current)}`;
+    displayValue.result = `${operate (displayValue.operator, 
+        displayValue.stored.replaceAll("," , ""), 
+        displayValue.current.replaceAll("," , "")).toLocaleString()}`;
+    
+    displayValue.result =
 
     displayValue.equals = "on";
 
@@ -180,16 +179,14 @@ function tempValue (value) {
     clearZero("temp");
     displayValue.temp += value;
     mostRecent("temp");
-    if (displayValue.temp.length > 3) {
-        addComma(displayValue.temp);
-    }
     maxNine(displayValue.temp);
+    displayValue.temp = Number(displayValue.temp.replaceAll(",","")).toLocaleString();
+    
     screen.textContent = displayValue.temp;
 }
 
 function maxNine (num) {
-    const regex = /[0-9]/g;
-    const max = num.match(regex).join("")
+    const max = num.match(/[0-9]/g).join("");
     
     //each max is +2 to account for commas
     if (max.length >= 9 ) {
@@ -207,35 +204,11 @@ function maxNine (num) {
     return num;
 };
 
-function addComma (num) {
-   
-    if (num.length === 8) {
-        const firstTwoSets = num.substr(0,7);
-        const thirdSet = num.substr(7);
-        num = firstTwoSets + "," + thirdSet;
-    } else if (!num.includes(",")) {
-        const firstSet = num.substr(0,3);
-        const secondSet = num.substr(3);
-        num = firstSet + "," + secondSet;
-    } else {
-        num;
-    }
-    
-    displayValue[`${displayValue.recent}`] = num;
-    return num;
-}
+// function roundNum () {
 
-function removeCommas(num) {
-    if (num.includes(",")) {
-        num = num.replaceAll(",", ""); 
-        console.log(num)
-    }
-    return num;
-}
+// }
 
 //roundnum
-
-//commas
 
 //floating num
 
