@@ -129,9 +129,11 @@ function display(e) {
             clearZero("current");
             displayValue.current += value;
             mostRecent("current");
+            if (displayValue.current.length > 3) {
+                addComma(displayValue.current);
+            }
             maxNine(displayValue.current);
             screen.textContent = displayValue.current;
-            
         }
     }  else { //accepts values (initial)
         tempValue(value);
@@ -149,6 +151,9 @@ function operation () {
         displayValue.current = displayValue.stored;
     };
     
+    displayValue.stored = removeCommas(displayValue.stored);
+    displayValue.current = removeCommas(displayValue.current);
+
     displayValue.result = `${operate (displayValue.operator, displayValue.stored, displayValue.current)}`;
 
     displayValue.equals = "on";
@@ -175,7 +180,9 @@ function tempValue (value) {
     clearZero("temp");
     displayValue.temp += value;
     mostRecent("temp");
-    addComma(displayValue.temp)
+    if (displayValue.temp.length > 3) {
+        addComma(displayValue.temp);
+    }
     maxNine(displayValue.temp);
     screen.textContent = displayValue.temp;
 }
@@ -184,15 +191,16 @@ function maxNine (num) {
     const regex = /[0-9]/g;
     const max = num.match(regex).join("")
     
+    //each max is +2 to account for commas
     if (max.length >= 9 ) {
         if (num.endsWith(".")) {
-            num = num.substring(0,9)
+            num = num.substring(0,11)
         } else if (num.includes(".") && num.includes("-")) {
-            num = num.substring(0, 11)
+            num = num.substring(0, 13)
         }  else if (num.includes(".") || num.includes("-")) {
-            num = num.substring(0, 10)
+            num = num.substring(0, 12)
         }  else {
-            num = num.substring(0,9)
+            num = num.substring(0,11)
         }
         displayValue[`${displayValue.recent}`] = num;
     }
@@ -200,18 +208,30 @@ function maxNine (num) {
 };
 
 function addComma (num) {
-    // if there's a decimal, take length in groups of three up to the decimal
-    // if no decimal, take every third
-    
-    if (num.length > 6) {
-        num = num.substr(0,3) + "," + num.substr(3, 6) + "," + num.substr (6);
-    } else if (num.length > 3) {
-        //string split at 3, add a comma, add the rest
-        num = num.substr(0,3) + "," + num(3)
+   
+    if (num.length === 8) {
+        const firstTwoSets = num.substr(0,7);
+        const thirdSet = num.substr(7);
+        num = firstTwoSets + "," + thirdSet;
+    } else if (!num.includes(",")) {
+        const firstSet = num.substr(0,3);
+        const secondSet = num.substr(3);
+        num = firstSet + "," + secondSet;
+    } else {
+        num;
     }
+    
+    displayValue[`${displayValue.recent}`] = num;
     return num;
 }
 
+function removeCommas(num) {
+    if (num.includes(",")) {
+        num = num.replaceAll(",", ""); 
+        console.log(num)
+    }
+    return num;
+}
 
 //roundnum
 
