@@ -130,7 +130,7 @@ function display(e) {
             displayValue.current += value;
             mostRecent("current");
             maxNine(displayValue.current);
-            displayValue.current = Number(displayValue.current.replaceAll(",","")).toLocaleString();
+            displayValue.current = addCommas(displayValue.current);
             screen.textContent = displayValue.current;
         }
     }  else { //accepts values (initial)
@@ -145,16 +145,30 @@ function isOperator(e) {
 }
 
 function operation () {
-    if (displayValue.current === "") {
+    if (displayValue.current === "0") {
         displayValue.current = displayValue.stored;
     };
+    mostRecent("stored");
 
     displayValue.result = `${operate (displayValue.operator, 
         displayValue.stored.replaceAll("," , ""), 
-        displayValue.current.replaceAll("," , "")).toLocaleString()}`;
-    
-    displayValue.result =
+        displayValue.current.replaceAll("," , ""))
+        }`;
 
+
+    if (displayValue.result.length >= 9) {
+        displayValue.result = `${Number(displayValue.result).toExponential()}`;
+        
+        console.log(displayValue.result)
+        floatNum(displayValue.result);
+        console.log("hi")
+    } else {
+        displayValue.result = addCommas(displayValue.result);
+    }
+    // else {
+    //     displayValue.result = addCommas(displayValue.result);
+    //     displayValue.result = maxNine(displayValue.result);
+    // }
     displayValue.equals = "on";
 
     //when equals is pressed multiple times it still works
@@ -162,7 +176,7 @@ function operation () {
     displayValue.temp = displayValue.result;
 
     screen.textContent = displayValue.stored;
-    mostRecent("stored");
+    
 }
 
 function mostRecent(lastUsed) {
@@ -180,8 +194,7 @@ function tempValue (value) {
     displayValue.temp += value;
     mostRecent("temp");
     maxNine(displayValue.temp);
-    displayValue.temp = Number(displayValue.temp.replaceAll(",","")).toLocaleString();
-    
+    displayValue.temp = addCommas(displayValue.temp)
     screen.textContent = displayValue.temp;
 }
 
@@ -204,13 +217,28 @@ function maxNine (num) {
     return num;
 };
 
-// function roundNum () {
+function addCommas(num) {
+    return num = Number(num.replaceAll(",",""))
+    .toLocaleString("en-US", {maximumFractionDigits: 4});
 
-// }
+}
 
-//roundnum
+function floatNum (num) {
+    // const max = num.match(/[0-9]/g).join("");
+    const locationE = num.indexOf("e");
+    const e = num.substring(locationE, locationE + 1)
+    const float = num.substring(locationE + 2)
 
-//floating num
+    if (num.length >= 9) {
+    const leftover = 9-1-float.length;
+    num = num.substring(0,leftover) + e + float;
+    } else {
+    num = num.substring(0,locationE) + e + float;
+    }
+
+    displayValue.result = num;
+}
+
 
 //show equation
 
