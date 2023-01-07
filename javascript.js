@@ -168,19 +168,7 @@ function operation () {
         displayValue.current.replaceAll("," , ""))
         }`;
 
-
-    if (Number(displayValue.result) >= 999999999) {
-        displayValue.result = `${Number(displayValue.result).toExponential()}`;
-        displayValue.result = floatNum(displayValue.result);
-    } else if (Number(displayValue.result) <= 0.00000001) {
-        displayValue.result = `${Number(displayValue.result).toExponential()}`;
-        displayValue.result = floatNum(displayValue.result);
-    } else if (displayValue.result.includes("e-")) {
-        displayValue.result = floatNum(displayValue.result);
-    } else {
-        displayValue.result = maxNine(displayValue.result)
-        displayValue.result = addCommas(displayValue.result);
-    }
+    displayValue.result = formatResult(displayValue.result);
 
     displayValue.equals = "on";
 
@@ -257,9 +245,22 @@ function floatNum (num) {
     return num;
 }
 
-//fix maxNine
-//currently not enough if commas are there, too many if no commas need to add conditional for one or two commas
-//maybe just rid of maxNine entirely and allow floating point nums
+function formatResult(result) {
+    if (Number(result) >= 999999999) {
+        result = `${Number(result).toExponential()}`;
+        result = floatNum(result);
+    } else if (Number(result) <= 0.00000001) {
+        result = `${Number(result).toExponential()}`;
+        result = floatNum(result);
+    } else if (result.includes("e-")) {
+        result = floatNum(result);
+    } else {
+        result = maxNine(result)
+        result = addCommas(result);
+    }
+    return result;
+}
+
 //show equation
 
 //keyboard support
