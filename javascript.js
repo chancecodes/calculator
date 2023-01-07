@@ -69,7 +69,19 @@ const special = {
         }
     },
     percent: function percent(num) {
-        return num =  `${num / 100}`;
+        num =  `${Number(num.replaceAll(",","")) / 100}`;
+        console.log(num)
+        if (Number(num) < 0.00000001) {
+            num = `${Number(num).toExponential()}`;
+            num = floatNum(num);
+            console.log("hi")
+        } else if(num.includes("e")) {
+            num = floatNum(num);
+        } else {
+            num = maxNine(num);
+            num = addCommas(num);
+        }
+        return num
     },
     clear: function clear(num) {
         if (displayValue.recent === "current" && displayValue.current === "0") {
@@ -159,14 +171,15 @@ function operation () {
 
     if (Number(displayValue.result) >= 999999999) {
         displayValue.result = `${Number(displayValue.result).toExponential()}`;
-    
-        floatNum(displayValue.result);
+        displayValue.result = floatNum(displayValue.result);
+    } else if (Number(displayValue.result) <= 0.00000001) {
+        displayValue.result = `${Number(displayValue.result).toExponential()}`;
+        displayValue.result = floatNum(displayValue.result);
+    } else if (displayValue.result.includes("e-")) {
+        displayValue.result = floatNum(displayValue.result);
     } else {
-        console.log(displayValue.result)
         displayValue.result = maxNine(displayValue.result)
-        console.log(displayValue.result)
         displayValue.result = addCommas(displayValue.result);
-        console.log(displayValue.result)
     }
 
     displayValue.equals = "on";
@@ -200,16 +213,17 @@ function tempValue (value) {
 
 function maxNine (num) {
     const max = num.match(/[0-9]/g).join("");
- 
+    const commas = (num.match(/,/g) || []).length
+
     if (max.length >= 9 ) {
         if (num.endsWith(".")) {
-            num = num.substring(0,9)
+            num = num.substring(0,9 + commas)
         } else if (num.includes(".") && num.includes("-")) {
-            num = num.substring(0, 11)
+            num = num.substring(0, 11 + commas)
         }  else if (num.includes(".") || num.includes("-")) {
-            num = num.substring(0, 10)
+            num = num.substring(0, 10 + commas)
         }  else {
-            num = num.substring(0,9)
+            num = num.substring(0,9 + commas)
         }
         displayValue[`${displayValue.recent}`] = num;
     }
@@ -225,19 +239,27 @@ function addCommas(num) {
 function floatNum (num) {
     const locationE = num.indexOf("e");
     const e = num.substring(locationE, locationE + 1)
-    const float = num.substring(locationE + 2)
+    var float = num.substring(locationE + 2)
 
-    if (num.length >= 9) {
-    const leftover = 9-1-float.length;
-    num = num.substring(0,leftover) + e + float;
+    if (num.length < 10) {
+        num
+    } else if (num.includes("e-")) {
+        float = num.substring(locationE)
+        const leftover = 9-float.length
+        num = num.substring(0,leftover) + float;
+    } else if (num.length >= 9) {
+        const leftover = 9-1-float.length;
+        num = num.substring(0,leftover) + e + float;
     } else {
-    num = num.substring(0,locationE) + e + float;
+        num = num.substring(0,locationE) + e + float;
     }
 
-    displayValue.result = num;
+    return num;
 }
 
-
+//fix maxNine
+//currently not enough if commas are there, too many if no commas need to add conditional for one or two commas
+//maybe just rid of maxNine entirely and allow floating point nums
 //show equation
 
 //keyboard support
