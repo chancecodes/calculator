@@ -13,13 +13,22 @@ var displayValue = {
     stored: "",
     current: "",
     operator: "",
+    symbol: "",
     result: "",
     equals: "",
     recent: "temp",
 };
 
+var equation = {
+    one: "",
+    two: "",
+}
+
 const screen = document.querySelector('.display');
 screen.textContent = displayValue.temp;
+
+const eqn = document.querySelector('.eqn');
+const fullEquation = `${displayValue.stored} ${displayValue.symbol} ${displayValue.current} =`
 
 const btn = document.querySelectorAll('.btn')
 btn.forEach((button) => {
@@ -54,6 +63,7 @@ function operate(callback, a, b) {
 
 const special = {
     allClear: function allClear(num) {
+        eqn.textContent = "";
         for (let key in displayValue) {
             displayValue[key] = "";
         }
@@ -70,17 +80,18 @@ const special = {
     },
     percent: function percent(num) {
         num =  `${Number(num.replaceAll(",","")) / 100}`;
-        console.log(num)
-        if (Number(num) < 0.00000001) {
+        
+        if ((Number(num) < 0.00000001 && Number(num > 0)) ||
+        (Number(num) > -0.00000001 && Number(num < 0))) {
             num = `${Number(num).toExponential()}`;
             num = floatNum(num);
-            console.log("hi")
         } else if(num.includes("e")) {
             num = floatNum(num);
         } else {
             num = maxNine(num);
             num = addCommas(num);
         }
+
         return num
     },
     clear: function clear(num) {
@@ -118,7 +129,6 @@ function display(e) {
         result = special[`${specialty}`](lastUsed);
         
         displayValue[`${displayValue.recent}`] = screen.textContent = result;
-
     }  else if (isOperator(e)) { //stop accepting values and store operator
         // compute sum if second operator is clicked
         if ((displayValue.stored && displayValue.equals === "off") 
@@ -126,7 +136,11 @@ function display(e) {
             operation();
         }
         displayValue.operator = e.currentTarget.id;
+        displayValue.symbol = e.currentTarget.innerHTML;
         displayValue.stored = displayValue.temp;
+        if (displayValue.current === "") {
+            eqn.textContent = `${displayValue.stored} ${displayValue.symbol}`
+        }
         displayValue.current = "";
         displayValue.equals = "off";
         mostRecent("current");
@@ -144,11 +158,12 @@ function display(e) {
             maxNine(displayValue.current);
             displayValue.current = addCommas(displayValue.current);
             screen.textContent = displayValue.current;
+            eqn.textContent = `${displayValue.stored} ${displayValue.symbol}`
         }
     }  else { //accepts values (initial)
         tempValue(value);
     }
-
+    // displayEquation();
     console.table(displayValue);
 }
 
@@ -171,7 +186,7 @@ function operation () {
     displayValue.result = formatResult(displayValue.result);
 
     displayValue.equals = "on";
-
+    eqn.textContent = `${displayValue.stored} ${displayValue.symbol} ${displayValue.current} = `
     //when equals is pressed multiple times it still works
     displayValue.stored = displayValue.result; 
     displayValue.temp = displayValue.result;
@@ -197,6 +212,7 @@ function tempValue (value) {
     maxNine(displayValue.temp);
     displayValue.temp = addCommas(displayValue.temp)
     screen.textContent = displayValue.temp;
+    // eqn.textContent = displayValue.temp;
 }
 
 function maxNine (num) {
@@ -219,8 +235,13 @@ function maxNine (num) {
 };
 
 function addCommas(num) {
-    return num = Number(num.replaceAll(",",""))
-    .toLocaleString("en-US", {maximumFractionDigits: 8});
+    if (num.endsWith(".0")) {
+        return num
+    } else {
+       return num = Number(num.replaceAll(",",""))
+    .toLocaleString("en-US", {maximumFractionDigits: 8}); 
+    }
+    
 
 }
 
@@ -246,10 +267,11 @@ function floatNum (num) {
 }
 
 function formatResult(result) {
-    if (Number(result) >= 999999999) {
+    if (Number(result) >= 999999999 || Number(result) <= -999999999) {
         result = `${Number(result).toExponential()}`;
         result = floatNum(result);
-    } else if (Number(result) <= 0.00000001) {
+    } else if ((Number(result) <= 0.00000001 && Number(result) > 0) ||
+    (Number(result) >= -0.00000001 && Number(result) < 0)) {
         result = `${Number(result).toExponential()}`;
         result = floatNum(result);
     } else if (result.includes("e-")) {
@@ -261,7 +283,6 @@ function formatResult(result) {
     return result;
 }
 
-//show equation
 
 //keyboard support
 

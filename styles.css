@@ -1,7 +1,13 @@
+.eqn{
+    border: 1px solid black;
+    width: 450px;
+    height: 150px;
+}
+
 .display{
     border: 1px solid black;
     width: 450px;
-    height: 250px;
+    height: 100px;
 }
 
 .container {
