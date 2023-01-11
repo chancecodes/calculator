@@ -19,25 +19,39 @@ var displayValue = {
     recent: "temp",
 };
 
-var equation = {
-    one: "",
-    two: "",
-}
-
 const screen = document.querySelector('.display');
 screen.textContent = displayValue.temp;
 
 const eqn = document.querySelector('.eqn');
 const fullEquation = `${displayValue.stored} ${displayValue.symbol} ${displayValue.current} =`
 
-const btn = document.querySelectorAll('.btn')
+const clearBtn = document.querySelector('.switch');
+
+var key;
+
+window.addEventListener('keydown', function(e) {
+    if (e.key === "Enter") {
+        key = document.querySelector(`button[key="="]`);
+    } else if (e.key === "Backspace") {
+        key = document.querySelector(`div[key="${e.key}"]`);
+    } else if (e.key === "Escape") {
+        key = clearBtn;
+    } else {
+        key = document.querySelector(`button[key="${e.key}"]`);
+    }
+    
+    return (!key) ? false : display();
+});
+
+const btn = document.querySelectorAll('.btn');
+
 btn.forEach((button) => {
     button.addEventListener ('click', display);
 })
 
 const operator = {
     add: function add(a, b) {
-        return a + b
+        return a + b;
     },
     subtract: function subtract(a, b) {
         return a - b;
@@ -47,7 +61,7 @@ const operator = {
     },
     divide: function divide(a, b) {
         if (b === 0) {
-            return "i'll pretend this didn't happen"
+            return "i'll pretend this didn't happen";
         } else {
             return a / b;
         } 
@@ -67,13 +81,13 @@ const special = {
         for (let key in displayValue) {
             displayValue[key] = "";
         }
-        displayValue.recent = "temp"
+        displayValue.recent = "temp";
         num = "0";
         return num;
     },
     negator: function negator(num) {
         if (num.startsWith("-")) {
-            return num = num.slice(1)
+            return num = num.slice(1);
         } else {
             return num = "-" + num;
         }
@@ -92,7 +106,7 @@ const special = {
             num = addCommas(num);
         }
 
-        return num
+        return num;
     },
     clear: function clear(num) {
         if (displayValue.recent === "current" && displayValue.current === "0") {
@@ -102,41 +116,58 @@ const special = {
         } else {
             special.allClear();
         }
-        return num;
+        clearBtn.id = "allClear";
+        clearBtn.innerHTML = "AC";
+        return num = "0";
     },
     decimal: function decimal(num) {
         if (displayValue.temp === "0") {
-            displayValue.recent = "temp"
-            num = "0."
+            displayValue.recent = "temp";
+            num = "0.";
         } else if (num === "" || num === "0") {
-            num = "0."
+            num = "0.";
         } else if (!num.includes(".")) {
-            num += "."
+            num += ".";
         } else {
-            num
+            num;
         }
         num = maxNine(num);
         return num;
     },
+    backspace: function backspace(num) {
+        if (displayValue.recent === "current" && displayValue.current === "0") {
+            special.allClear();
+        } else if (displayValue.recent === "current" || displayValue.recent === "temp") {
+            const end = num.length - 1;
+
+            num = num.substring(0, end);
+            num = addCommas(num);
+            
+            if (num==="") num = "0";
+        } else {
+            special.allClear();
+        }
+        return num;
+    }
 }
 
 function display(e) {
-    const value = e.currentTarget.innerHTML;
+    const value = !key ? e.currentTarget : key;
     const lastUsed = displayValue[`${displayValue.recent}`];
 
-    if (e.currentTarget.classList.contains("special")) {
-        let specialty = e.currentTarget.id;    
+    if (value.classList.contains("special")) {
+        let specialty = value.id;    
         result = special[`${specialty}`](lastUsed);
         
         displayValue[`${displayValue.recent}`] = screen.textContent = result;
-    }  else if (isOperator(e)) { //stop accepting values and store operator
+    }  else if (isOperator(value)) { //stop accepting values and store operator
         // compute sum if second operator is clicked
         if ((displayValue.stored && displayValue.equals === "off") 
         && (displayValue.current != "")) {
             operation();
         }
-        displayValue.operator = e.currentTarget.id;
-        displayValue.symbol = e.currentTarget.innerHTML;
+        displayValue.operator = value.id;
+        displayValue.symbol = value.innerHTML;
         displayValue.stored = displayValue.temp;
         if (displayValue.current === "") {
             eqn.textContent = `${displayValue.stored} ${displayValue.symbol}`
@@ -144,31 +175,33 @@ function display(e) {
         displayValue.current = "";
         displayValue.equals = "off";
         mostRecent("current");
-    } else if (e.currentTarget.id === "equals") {
+    } else if (value.id === "equals") {
         operation();
     } else if (displayValue.stored) { // accepts new values after operator
         //if new number was pressed after equals, clear and start back at temp
         if (displayValue.equals === "on") {  
             special.allClear();
-            tempValue(value);
+            tempValue(value.innerHTML);
         } else {
             clearZero("current");
-            displayValue.current += value;
+            displayValue.current += value.innerHTML;
             mostRecent("current");
             maxNine(displayValue.current);
             displayValue.current = addCommas(displayValue.current);
             screen.textContent = displayValue.current;
-            eqn.textContent = `${displayValue.stored} ${displayValue.symbol}`
+            eqn.textContent = `${displayValue.stored} ${displayValue.symbol}`;
+            clearBtn.id = "clear";
+            clearBtn.innerHTML = "C";
         }
     }  else { //accepts values (initial)
-        tempValue(value);
+        tempValue(value.innerHTML);
     }
-    // displayEquation();
+    key = "";
     console.table(displayValue);
 }
 
-function isOperator(e) {
-    return (e.currentTarget.classList.contains("operator") ? true : false);
+function isOperator(value) {
+    return (value.classList.contains("operator") ? true : false);
 }
 
 function operation () {
@@ -212,22 +245,24 @@ function tempValue (value) {
     maxNine(displayValue.temp);
     displayValue.temp = addCommas(displayValue.temp)
     screen.textContent = displayValue.temp;
+    clearBtn.id = "clear";
+    clearBtn.innerHTML = "C";
     // eqn.textContent = displayValue.temp;
 }
 
 function maxNine (num) {
     const max = num.match(/[0-9]/g).join("");
-    const commas = (num.match(/,/g) || []).length
+    const commas = (num.match(/,/g) || []).length;
 
     if (max.length >= 9 ) {
         if (num.endsWith(".")) {
-            num = num.substring(0,9 + commas)
+            num = num.substring(0,9 + commas);
         } else if (num.includes(".") && num.includes("-")) {
-            num = num.substring(0, 11 + commas)
+            num = num.substring(0, 11 + commas);
         }  else if (num.includes(".") || num.includes("-")) {
-            num = num.substring(0, 10 + commas)
+            num = num.substring(0, 10 + commas);
         }  else {
-            num = num.substring(0,9 + commas)
+            num = num.substring(0,9 + commas);
         }
         displayValue[`${displayValue.recent}`] = num;
     }
@@ -235,25 +270,25 @@ function maxNine (num) {
 };
 
 function addCommas(num) {
-    if (num.endsWith(".0")) {
-        return num
+    if (num === "0") {
+        return num;
+    } else if (num.includes(".0")) {
+        return num;
     } else {
        return num = Number(num.replaceAll(",",""))
     .toLocaleString("en-US", {maximumFractionDigits: 8}); 
     }
-    
-
 }
 
 function floatNum (num) {
     const locationE = num.indexOf("e");
-    const e = num.substring(locationE, locationE + 1)
-    var float = num.substring(locationE + 2)
+    const e = num.substring(locationE, locationE + 1);
+    var float = num.substring(locationE + 2);
 
     if (num.length < 10) {
-        num
+        num;
     } else if (num.includes("e-")) {
-        float = num.substring(locationE)
+        float = num.substring(locationE);
         const leftover = 9-float.length
         num = num.substring(0,leftover) + float;
     } else if (num.length >= 9) {
@@ -282,10 +317,3 @@ function formatResult(result) {
     }
     return result;
 }
-
-
-//keyboard support
-
-//backspace
-
-//make pretty
