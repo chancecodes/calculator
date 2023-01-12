@@ -222,11 +222,11 @@ function operation () {
     displayValue.result = formatResult(displayValue.result);
 
     displayValue.equals = "on";
-    
+    eqn.textContent = `${addCommas(displayValue.stored)} ${displayValue.symbol} ${displayValue.current} = `
     //when equals is pressed multiple times it still works
     displayValue.stored = displayValue.result; 
     
-    eqn.textContent = `${displayValue.stored} ${displayValue.symbol} ${displayValue.current} = `
+   
     displayValue.temp = displayValue.result;
 
     screen.textContent = displayValue.stored;
