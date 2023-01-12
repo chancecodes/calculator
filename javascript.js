@@ -23,7 +23,6 @@ const screen = document.querySelector('.display');
 screen.textContent = displayValue.temp;
 
 const eqn = document.querySelector('.eqn');
-// const fullEquation = `${displayValue.stored} ${displayValue.symbol} ${displayValue.current} =`
 
 const clearBtn = document.querySelector('.switch');
 
@@ -202,7 +201,6 @@ function display(e) {
         tempValue(value.innerHTML);
     }
     key = "";
-    console.table(displayValue);
 }
 
 function isOperator(value) {
@@ -255,7 +253,6 @@ function tempValue (value) {
     screen.textContent = displayValue.temp;
     clearBtn.id = "clear";
     clearBtn.innerHTML = "C";
-    // eqn.textContent = displayValue.temp;
 }
 
 function maxNine (num) {
