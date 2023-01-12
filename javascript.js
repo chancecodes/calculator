@@ -23,7 +23,7 @@ const screen = document.querySelector('.display');
 screen.textContent = displayValue.temp;
 
 const eqn = document.querySelector('.eqn');
-const fullEquation = `${displayValue.stored} ${displayValue.symbol} ${displayValue.current} =`
+// const fullEquation = `${displayValue.stored} ${displayValue.symbol} ${displayValue.current} =`
 
 const clearBtn = document.querySelector('.switch');
 
@@ -86,7 +86,9 @@ const special = {
         return num;
     },
     negator: function negator(num) {
-        if (num.startsWith("-")) {
+        if (num==="0") {
+            return num
+        } else if (num.startsWith("-")) {
             return num = num.slice(1);
         } else {
             return num = "-" + num;
@@ -121,7 +123,10 @@ const special = {
         return num = "0";
     },
     decimal: function decimal(num) {
-        if (displayValue.temp === "0") {
+        if (displayValue.equals === "on") {  
+            special.allClear();
+            num = "0.";
+        } else if (displayValue.temp === "0") {
             displayValue.recent = "temp";
             num = "0.";
         } else if (num === "" || num === "0") {
@@ -219,13 +224,16 @@ function operation () {
     displayValue.result = formatResult(displayValue.result);
 
     displayValue.equals = "on";
-    eqn.textContent = `${displayValue.stored} ${displayValue.symbol} ${displayValue.current} = `
+    
     //when equals is pressed multiple times it still works
     displayValue.stored = displayValue.result; 
+    
+    eqn.textContent = `${displayValue.stored} ${displayValue.symbol} ${displayValue.current} = `
     displayValue.temp = displayValue.result;
 
     screen.textContent = displayValue.stored;
-    
+    clearBtn.id = "allClear";
+    clearBtn.innerHTML = "AC"
 }
 
 function mostRecent(lastUsed) {
